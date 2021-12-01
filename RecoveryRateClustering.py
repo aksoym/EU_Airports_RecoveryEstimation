@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 
-pickle_path = 'Schiphol_recovery_rates_dict_w_7masks.pickle'
-apt_name = pickle_path.split('_')[0]
+
+pickle_path = 'recoveryRate_pickles/Schiphol_allTime_recoveryRates.pickle'
+#apt_name = pickle_path.split('_')[0]
+apt_name = 'Schiphol'
 
 with open(pickle_path, 'rb') as file:
     recovery_rate_dict = pickle.load(file)
@@ -28,5 +29,5 @@ plt.title(f'Recovery Rates for Different Regulation Causes ({apt_name} Airport)'
 plt.ylabel('Recovery Rate')
 plt.xlabel('Regulation Type')
 plt.legend()
-plt.savefig(f'{apt_name}_recoveryRates_{len(mask_names)}masks.png')
+plt.savefig(f'{apt_name}_recoveryRates_allTime.png')
 plt.show()

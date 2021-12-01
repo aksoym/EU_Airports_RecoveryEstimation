@@ -100,6 +100,6 @@ for mask_name, mask in zip(mask_names, mask_list):
 
         all_recovery_rates_dict[mask_name][(date_id, tw_id)] = recovery_rate
 
-with open(f'{center_apt_str}_recovery_rates_dict_w_{len(mask_names)}masks.pickle', 'wb') as file:
+with open(f'recoveryRate_pickles/{center_apt_str}_recovery_rates_all_times.pickle', 'wb') as file:
     pickle.dump(all_recovery_rates_dict, file)
 
