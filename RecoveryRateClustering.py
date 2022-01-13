@@ -30,4 +30,6 @@ plt.ylabel('Recovery Rate')
 plt.xlabel('Regulation Type')
 plt.legend()
 plt.savefig(f'{apt_name}_recoveryRates_allTime.png')
+
 plt.show()
+print(len(recovery_rate_dict), recovery_rate_dict.keys(), len(recovery_rate_dict['Unmasked']))
