@@ -78,13 +78,12 @@ path = 'neuralNetwork_models/' + model_name
 
 model = load_model(path)
 
+print(model.summary())
 # Make the prediction
 x_test_apt = np.array(combined_csv_filter0[(combined_csv_filter0["date"] == float(date_)) & (combined_csv_filter0["time_window"] == tw)]["airport"])
 x_test = np.array(combined_csv_filter0[(combined_csv_filter0["date"] == float(date_)) & (combined_csv_filter0["time_window"] == tw)][used])
 y_test = np.array(combined_csv_filter0[(combined_csv_filter0["date"] == float(date_)) & (combined_csv_filter0["time_window"] == tw)]["recovery_rates"])
-
+print(x_test.shape)
 
 y_predicted = model.predict(x_test)
 
-print(y_predicted)
-print(airportList)

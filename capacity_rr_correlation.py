@@ -5,52 +5,70 @@ from functions import dfFlights_twFilter, flightFlow
 import pickle
 
 
-file = "../../Arinc/Main/allft_data/csv/201805"
-date = 20180529
-tw = 2
-
-df_flights = pd.read_csv(file + "/" + str(date) + ".csv")
-apt_df_filtered = pd.read_csv("../../Arinc/Main/misc_data/airportFiltered.csv", index_col=0)
-
 pickle_path = 'recoveryRate_pickles/Munich_allTime_recoveryRates.pickle'
 #apt_name = pickle_path.split('_')[0]
-apt_name = 'Munich'
+airport_code = 'EDDM'
 
 with open(pickle_path, 'rb') as file:
     recovery_rate_dict = pickle.load(file)
 
-def capacity_change(airport, tw):
+def capacity_change(airport_code, tw, df_flights):
 
-    first_hours_capacity = df_flights[(df_flights['arr'] == airport)
+    first_hours_capacity = df_flights[(df_flights['arr'] == airport_code)
                                       & ((df_flights['ftfmArr_tw'] == tw + 0)
                                          | (df_flights['ftfmArr_tw'] == tw + 1)
                                          | (df_flights['ftfmArr_tw'] == tw + 2)
                                          | (df_flights['ftfmArr_tw'] == tw + 3))].__len__()
 
-    second_hours_capacity = df_flights[(df_flights['arr'] == airport)
-                                       & ((df_flights['ftfmArr_tw'] == tw + 4)
-                                          | (df_flights['ftfmArr_tw'] == tw + 5)
-                                          | (df_flights['ftfmArr_tw'] == tw + 6)
-                                          | (df_flights['ftfmArr_tw'] == tw + 7))].__len__()
 
-    third_hours_capacity = df_flights[(df_flights['arr'] == airport)
+    third_hours_capacity = df_flights[(df_flights['arr'] == airport_code)
                                       & ((df_flights['ftfmArr_tw'] == tw + 8)
                                          | (df_flights['ftfmArr_tw'] == tw + 9)
                                          | (df_flights['ftfmArr_tw'] == tw + 10)
                                          | (df_flights['ftfmArr_tw'] == tw + 11))].__len__()
 
-    first_change = second_hours_capacity - first_hours_capacity
-    second_change = third_hours_capacity - second_hours_capacity
-    total_change = first_change + second_change
-
-    return total_change
 
 
 
 
-for day in dates:
-    for tw
+    return third_hours_capacity - first_hours_capacity
+
+
+
+recovery_rate_capacity_correlation_dict = {}
+for day in np.arange('2018-01', '2018-07', dtype='datetime64[D]'):
+
+    day_trimmed_str = np.datetime_as_string(day).replace('-', '')
+    df_flights = pd.read_csv('csv/' + day_trimmed_str[0:6] + "/" + day_trimmed_str + ".csv")
+
+    recovery_rate_capacity_correlation_dict[day] = []
+
+    for idx, recovery_rate_value in enumerate(np.nditer(recovery_rate_dict['Unmasked'][day, 0])):
+        if not np.isnan(recovery_rate_value):
+            recovery_rate_capacity_correlation_dict[day].append((recovery_rate_value.item(0),
+                                                                 capacity_change(airport_code, idx*12, df_flights)
+                                                                 ))
+        else:
+            pass
 
 #%%
+recovery_rate_capacity_change_list = []
 
-recovery_rate_dict['Unmasked'][np.datetime64('2018-01-05'), 0]
+for values in recovery_rate_capacity_correlation_dict.values():
+    recovery_rate_capacity_change_list.extend(values)
+
+rr_array = [x[0] for x in recovery_rate_capacity_change_list]
+capacity_change_array = [y[1] for y in recovery_rate_capacity_change_list]
+
+rr_capacity_array = np.array([rr_array[1:], capacity_change_array[:-1]])
+
+print(rr_capacity_array)
+
+corrcoef = np.corrcoef(rr_capacity_array)
+
+
+
+#%%
+import matplotlib.pyplot as plt
+
+print(corrcoef)
