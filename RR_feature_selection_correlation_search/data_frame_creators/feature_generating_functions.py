@@ -1,5 +1,7 @@
 from functions import *
 
+
+
 def capacity_change(airport_code, tw, df_flights):
 
     first_hours_capacity = df_flights[(df_flights['arr'] == airport_code)
@@ -52,7 +54,7 @@ def capacity(airport_code, tw, df_flights):
 
     return (avg_capacity, total_capacity)
 
-def demand(airport_code, tw, df_flights):
+def demand(airport_code, tw, df_flights, apt_df_filtered):
     """
 
     :param airport_code:
