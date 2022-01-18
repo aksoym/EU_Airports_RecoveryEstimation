@@ -4,7 +4,7 @@ import pandas as pd
 from feature_generating_functions import capacity_change
 
 
-with open('rr_feature_df_pickles/rr_feature_df_prev_total_capacity.pickle', 'rb') as file:
+with open('../rr_feature_df_pickles/rr_feature_df_prev_total_capacity.pickle', 'rb') as file:
     rr_feature_dataframe = pickle.load(file)
 
 date_tw_indexes = rr_feature_dataframe.index

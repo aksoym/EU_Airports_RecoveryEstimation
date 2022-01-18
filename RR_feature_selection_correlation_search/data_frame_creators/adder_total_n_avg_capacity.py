@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from feature_generating_functions import capacity
 
-with open('rr_feature_df_pickles/rr_feature_df_prev_capacity.pickle', 'rb') as file:
+with open('../rr_feature_df_pickles/rr_feature_df_prev_capacity.pickle', 'rb') as file:
     rr_feature_dataframe = pickle.load(file)
 
 date_tw_indexes = rr_feature_dataframe.index
