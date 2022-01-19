@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from feature_generating_functions import demand
+from tqdm import tqdm
 
 apt_df_filtered = pd.read_csv('../../misc_data/airportFiltered.csv', index_col=0)
 
@@ -12,7 +13,7 @@ apt_code = 'EDDM'
 date_tw_indexes = rr_dataframe.index
 
 avg_demand_list = []
-for index in date_tw_indexes:
+for index in tqdm(date_tw_indexes):
     date = index.split('_')[0]
     trimmed_date = date.replace('-', '')
     tw = int(index.split('_')[1])

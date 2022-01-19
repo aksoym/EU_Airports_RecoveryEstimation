@@ -54,6 +54,24 @@ def capacity(airport_code, tw, df_flights):
 
     return (avg_capacity, total_capacity)
 
+
+def get_airport_specific_demand(airport_code, df_subflights, apt_df_filtered):
+    airportList = list(apt_df_filtered.index)
+    airportList.append("XXXX")
+
+    df_subflights_aggApt = df_subflights.copy(deep=True)
+    df_subflights_aggApt.loc[~df_subflights["dep"].isin(airportList)] = df_subflights_aggApt.loc[
+        ~df_subflights["dep"].isin(airportList)].assign(dep="XXXX")
+    df_subflights_aggApt.loc[~df_subflights["arr"].isin(airportList)] = df_subflights_aggApt.loc[
+        ~df_subflights["arr"].isin(airportList)].assign(arr="XXXX")
+
+
+    return len(df_subflights_aggApt.loc[df_subflights_aggApt['arr'] == airport_code])
+
+
+
+
+
 def demand(airport_code, tw, df_flights, apt_df_filtered):
     """
 
@@ -63,11 +81,13 @@ def demand(airport_code, tw, df_flights, apt_df_filtered):
     :return: returns tuple (avg_demand, total_demand)
     """
 
+
+
+
     demand = 0
     for inner_tw in range(tw, tw+12):
         df_subflights, _ = dfFlights_twFilter(tw, df_flights)
-        flow_matrix_df, _ = flightFlow(apt_df_filtered, df_subflights)
-        demand += flow_matrix_df.loc[airport_code, :].sum()
+        demand += get_airport_specific_demand(airport_code, df_subflights, apt_df_filtered)
 
     avg_demand = demand / 12
     total_demand = demand
