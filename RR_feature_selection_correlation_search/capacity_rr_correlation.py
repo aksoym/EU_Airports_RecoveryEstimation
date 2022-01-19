@@ -5,7 +5,7 @@ from functions import dfFlights_twFilter, flightFlow
 import pickle
 
 
-pickle_path = '/home/aksoy/Desktop/START/Muhammet/Start_PyCharm/RR_feature_selection_correlation_search/rr_feature_df_pickles/rr_feature_df_prev_total_capacity.pickle'
+pickle_path = '/RR_feature_selection_correlation_search/rr_feature_df_pickles/rr_dataframe_munich/rr_feature_df_prev_total_capacity.pickle'
 #apt_name = pickle_path.split('_')[0]
 airport_code = 'EDDM'
 

@@ -26,7 +26,8 @@ apt_name = 'Munich'
 with open(pickle_path, 'rb') as file:
     recovery_rate_dict = pickle.load(file)
 
-with open('../RR_feature_selection_correlation_search/rr_feature_df_pickles/rr_feature_df_prev_total_capacity.pickle', 'rb') as file:
+with open(
+        '../RR_feature_selection_correlation_search/rr_feature_df_pickles/rr_dataframe_munich/rr_feature_df_prev_total_capacity.pickle', 'rb') as file:
     rr_feature_dataframe = pickle.load(file)
 
 

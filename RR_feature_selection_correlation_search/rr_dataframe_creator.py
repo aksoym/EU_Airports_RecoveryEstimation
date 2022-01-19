@@ -23,7 +23,7 @@ rr_feature_dataframe = pd.DataFrame(
     data = {'recovery_rate': recovery_rates}, index=pd.Index(indexes)
 )
 
-print(rr_feature_dataframe.head())
 
-with open('rr_feature_df_pickles/rr_feature_dataframe.pickle', 'wb') as file:
+
+with open('rr_feature_df_pickles/rr_zero_feature_dataframe_Munich.pickle', 'wb') as file:
     pickle.dump(rr_feature_dataframe, file)
