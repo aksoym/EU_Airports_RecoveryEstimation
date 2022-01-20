@@ -5,7 +5,7 @@ from functions import *
 from scipy import interpolate
 import matplotlib.pyplot as plt
 
-file = "../../Arinc/Main/allft_data/csv/201805"
+file = "../csv/201805"
 date = 20180529
 tw = 61
 aiport_plot_name = 'Schiphol'
@@ -18,9 +18,9 @@ legend_location = 'upper left'
 date_str = str(date)
 
 df_flights = pd.read_csv(file + "/" + str(date) + ".csv")
-apt_df_filtered = pd.read_csv("../../Arinc/Main/misc_data/airportFiltered.csv", index_col=0)
+apt_df_filtered = pd.read_csv("../misc_data/airportFiltered.csv", index_col=0)
 
-differential_timestep = 1/11
+differential_timestep = 1/2
 
 plot_date = f'{date_str[-2:]}-{date_str[-4:-2]}-{date_str[:4]}'
 
@@ -34,9 +34,7 @@ central_apt_delays = get_delays_around_tw(df_flights, central_apt_list, tw)
 all_apt_delays = get_delays_around_tw(df_flights, airportList, tw)
 single_delay = get_delays_around_tw(df_flights, single_airport_code, tw)
 
-infection_rates, recovery_rates = get_rates_around_tw(df_flights, airportList, tw,
-                                                     df_flights, airportList, tw,
-                                                              apt_df_filtered         apt_df_filtered)
+infection_rates, recovery_rates = get_rates_around_tw(df_flights, airportList, tw, apt_df_filtered)
 
 
 delay_probs = get_diff_probs(infection_rates, recovery_rates, airportList, differential_timestep,
@@ -45,6 +43,7 @@ delay_probs = get_diff_probs(infection_rates, recovery_rates, airportList, diffe
 central_apt_delay_probs = delay_probs.loc[central_apt_list, :].mean(axis=0).values
 all_apt_delay_probs = delay_probs.mean(axis=0).values
 single_apt_delay_prob = delay_probs.loc[single_airport_code, :].mean(axis=0).values
+print(single_apt_delay_prob)
 
 x_input = np.arange(-3, 6)
 x_input_for_probs = np.linspace(-3, 5, int(3*(1/differential_timestep + 1)))
@@ -105,6 +104,6 @@ ax2.legend(loc=legend_location)
 ax.tick_params(right=True, labelright=True)
 ax2.tick_params(right=True, labelright=True)
 fig.suptitle('Comparison of Actual Avg. Delay and Inferred Probability')
-plt.savefig(f'prob_plots_w_recovery_rates/{aiport_plot_name}_{plot_date}_{tw}_w_recovery_rates.png')
+#plt.savefig(f'prob_plots_w_recovery_rates/{aiport_plot_name}_{plot_date}_{tw}_w_recovery_rates.png')
 plt.show()
 

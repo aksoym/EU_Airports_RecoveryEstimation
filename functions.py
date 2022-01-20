@@ -271,10 +271,11 @@ def diffSISModel_Delay(recoveryRates, infectionRates, df_aptDelayVal, airportLis
         dot_p = (df_infectionRates - df_recoveryRates).dot(p) - (df_infectionRates.dot(p)) * p
         p = p + dot_p * timeStep
         p = p.fillna(0)
+
         p[p > 1] = 1
         p[p < 0] = 0
-        df_probs[i] = p
 
+        df_probs[i] = p
     return df_probs
 
 
@@ -326,4 +327,4 @@ def recoveryRatePipeline(df_flights, apt_df_filtered, tw):
     infectionRates = generateInfectionRates(flight_flow, airportList)
     recoveryRates = generateRecoveryRates_Delay(infectionRates, apt_delay_values)
 
-    return recoveryRates
+    return recoveryRates, infectionRates, flight_flow, apt_delay_values
