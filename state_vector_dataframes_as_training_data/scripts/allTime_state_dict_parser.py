@@ -52,6 +52,11 @@ for key, value in tqdm(all_time_dict.items()):
 
 
 
+idx = (slice(None), slice(None), slice(None))
+airport_state_dataframe.loc[idx, 'recovery_rate'] = pd.concat(rr_vector_list, axis=0)
+airport_state_dataframe.loc[idx, ['total_delay', 'delay_per_f', 'norm_delay_per_f']] = pd.concat(apt_delay_list, axis=0)
+infection_rate_dataframe.loc[idx, :] = pd.concat(inf_matrix_list, axis=0)
+flight_flow_dataframe.loc[idx, :] = pd.concat(ff_matrix_list, axis=0)
 
 infection_rate_dataframe.to_pickle('../data/all_time_infection_rate_df.pickle')
 flight_flow_dataframe.to_pickle('../data/all_time_flight_flow_df.pickle')
