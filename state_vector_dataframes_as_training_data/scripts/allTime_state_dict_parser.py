@@ -26,25 +26,30 @@ flight_flow_dataframe = pd.DataFrame(index=dataframe_mult_index, columns=airport
 
 airport_state_dataframe = pd.DataFrame(index=dataframe_mult_index)
 
+rr_vector_list = []
+inf_matrix_list = []
+ff_matrix_list = []
+apt_delay_list = []
 #Get each item from the dict and unpack.
 for key, value in tqdm(all_time_dict.items()):
     rr_vector, inf_matrix, ff_matrix, delay_df = value
     date = key.split('_')[0]
     tw = key.split('_')[1]
 
-    date_tw_indexer = (slice(date), slice(tw), slice(None))
-
     #For date, tw and all airports, assign recovery rate vector. 133x1
-    airport_state_dataframe.loc[date_tw_indexer, 'recovery_rate'] = rr_vector[:-1]
+    rr_vector_list.append(rr_vector[:-1])
 
     #For date, tw and all airports, assign delay values.
-    airport_state_dataframe.loc[date_tw_indexer, ['total_delay', 'delay_per_f', 'norm_delay_per_f']] = \
-        delay_df.loc[:, ['d_0', 'd_0_avg', 'd_0_avg15']]
+    apt_delay_list.append(delay_df.loc[:-1, ['d_0', 'd_0_avg', 'd_0_avg15']])
+
 
     #For date, tw assign the the matrices directly. airport_list x airport_list --> 133x133
-    infection_rate_dataframe.loc[date_tw_indexer, :] = inf_matrix.iloc[0:-1, 0:-1]
+
+    inf_matrix_list.append(inf_matrix.iloc[0:-1, 0:-1])
     #Same for flight flow matrix.
-    flight_flow_dataframe.loc[date_tw_indexer, :] = ff_matrix.iloc[0:-1, 0:-1]
+
+    ff_matrix_list.append(ff_matrix.iloc[0:-1, 0:-1])
+
 
 
 
