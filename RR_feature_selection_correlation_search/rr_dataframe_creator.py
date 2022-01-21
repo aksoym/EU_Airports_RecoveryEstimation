@@ -3,7 +3,7 @@ import pickle
 
 import pandas as pd
 
-pickle_path = '../recoveryRate_pickles/Munich_allTime_recoveryRates.pickle'
+pickle_path = '../recoveryRate_pickles/initial_recovery_rate_dicts/Munich_allTime_recoveryRates.pickle'
 
 with open(pickle_path, 'rb') as file:
     recovery_rate_dict = pickle.load(file)

@@ -19,7 +19,7 @@ def rolling_avg(x, interval=5):
 mask_names = ['CB', 'Fog', 'Snow', 'Rain', 'Thunder', 'Wind', 'Capacity']
 
 
-pickle_path = '../recoveryRate_pickles/Munich_allTime_recoveryRates.pickle'
+pickle_path = '../recoveryRate_pickles/initial_recovery_rate_dicts/Munich_allTime_recoveryRates.pickle'
 #apt_name = pickle_path.split('_')[0]
 apt_name = 'Munich'
 
