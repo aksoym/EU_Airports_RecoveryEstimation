@@ -27,5 +27,5 @@ for date in tqdm(np.arange(np.datetime64('2018-01-01'), np.datetime64('2018-07-0
         all_parameters_all_airports_dict[dict_key] = (recoveryRates, infectionRates, flight_flow, apt_delay_values)
 
 
-with open('../recoveryRate_pickles/all_airports_all_states_dict.pickle', 'wb') as file:
+with open('../../recoveryRate_pickles/all_airports_all_states_dict.pickle', 'wb') as file:
     pickle.dump(all_parameters_all_airports_dict, file)

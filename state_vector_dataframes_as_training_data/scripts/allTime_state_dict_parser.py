@@ -50,19 +50,21 @@ for key, value in tqdm(all_time_dict.items()):
 
     ff_matrix_list.append(ff_matrix.iloc[0:-1, 0:-1])
 
-
-
 idx = (slice(None), slice(None), slice(None))
 
 
-infection_rate_dataframe = pd.concat(inf_matrix_list, axis=0, ignore_index=True).reindex(index=dataframe_mult_index, labels=inf_matrix_list[0].columns)
-flight_flow_dataframe = pd.concat(ff_matrix_list, axis=0, ignore_index=True).reindex(index=dataframe_mult_index, labels=ff_matrix_list[0].columns)
+inf_matrix_df = pd.concat(inf_matrix_list, axis=0, ignore_index=True)
+ff_matrix_df = pd.concat(ff_matrix_list, axis=0, ignore_index=True)
+rr_vector_df = pd.concat(rr_vector_list, axis=0, ignore_index=True)
+apt_delay_df = pd.concat(apt_delay_list, axis=0, ignore_index=True)
 
-rr_vector_df = pd.concat(rr_vector_list, axis=0, ignore_index=True).reindex(index=dataframe_mult_index)
-apt_delay_df = pd.concat(apt_delay_list, axis=0, ignore_index=True).reindex(index=dataframe_mult_index, labels=apt_delay_list[0].columns)
 
-airport_state_dataframe.loc[idx, 'recovery_rate'] = rr_vector_df
-airport_state_dataframe.loc[idx, ['total_delay', 'delay_per_f', 'norm_delay_per_f']] = apt_delay_df
+
+airport_state_dataframe['recovery_rate'] = rr_vector_df.values
+airport_state_dataframe[['total_delay', 'delay_per_f', 'norm_delay_per_f']] = apt_delay_df.values
+infection_rate_dataframe.loc[:, :] = inf_matrix_df.values
+flight_flow_dataframe.loc[:, :] = ff_matrix_df.values
+
 
 infection_rate_dataframe.to_pickle('../data/all_time_infection_rate_df.pickle')
 flight_flow_dataframe.to_pickle('../data/all_time_flight_flow_df.pickle')
