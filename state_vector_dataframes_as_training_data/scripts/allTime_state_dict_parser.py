@@ -40,7 +40,7 @@ for key, value in tqdm(all_time_dict.items()):
     rr_vector_list.append(rr_vector[:-1])
 
     #For date, tw and all airports, assign delay values.
-    apt_delay_list.append(delay_df.iloc[:-1, :].loc[:, ['d_0', 'd_0_avg', 'd_0_avg15']])
+    apt_delay_list.append(delay_df.iloc[:-1, :].loc[:, ['d_0', 'd_0_avg', 'd_0_avg15', 'weighted_arrival_delay_d0']])
 
 
     #For date, tw assign the the matrices directly. airport_list x airport_list --> 133x133
@@ -61,7 +61,7 @@ apt_delay_df = pd.concat(apt_delay_list, axis=0, ignore_index=True)
 
 
 airport_state_dataframe['recovery_rate'] = rr_vector_df.values
-airport_state_dataframe[['total_delay', 'delay_per_f', 'norm_delay_per_f']] = apt_delay_df.values
+airport_state_dataframe[['total_delay', 'delay_per_f', 'norm_delay_per_f', 'weighted_arrival_delay']] = apt_delay_df.values
 infection_rate_dataframe.loc[:, :] = inf_matrix_df.values
 flight_flow_dataframe.loc[:, :] = ff_matrix_df.values
 

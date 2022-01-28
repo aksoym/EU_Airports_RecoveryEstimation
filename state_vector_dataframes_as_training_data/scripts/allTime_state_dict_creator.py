@@ -8,6 +8,7 @@ import pickle
 from functions import recoveryRatePipeline
 pd.set_option('mode.chained_assignment',None)
 
+file_root = "../../csv/"
 apt_df_filtered = pd.read_csv("../../misc_data/airportFiltered.csv", index_col=0)
 
 all_parameters_all_airports_dict = {}
@@ -16,7 +17,6 @@ for date in tqdm(np.arange(np.datetime64('2018-01-01'), np.datetime64('2018-07-0
     date_str_list = str(date).split('-')
     date_str = ''.join(date_str_list)
 
-    file_root = "../../csv/"
     df_flights = pd.read_csv(file_root + date_str[0:6] + "/" + date_str + ".csv")
 
 
@@ -27,5 +27,5 @@ for date in tqdm(np.arange(np.datetime64('2018-01-01'), np.datetime64('2018-07-0
         all_parameters_all_airports_dict[dict_key] = (recoveryRates, infectionRates, flight_flow, apt_delay_values)
 
 
-with open('../../recoveryRate_pickles/all_airports_all_states_dict.pickle', 'wb') as file:
+with open('../data/all_airports_all_states_dict.pickle', 'wb') as file:
     pickle.dump(all_parameters_all_airports_dict, file)

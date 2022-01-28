@@ -162,8 +162,10 @@ def calculateAirportDelays(df_flights, airportList, tw):
 
         #NEW LINES FOR WEIGHTED DELAY VALUES.(26-01-2022)
 
-        weighted_delay_d0 = (df_subflights_twApt_arr1['delayArr'] + df_subflights_twApt_arr1['delayDep']) \
-                            * ((df_subflights_twApt_arr1['ctfmArr'] - df_subflights_twApt_arr1['ctfmDep'])/3600)
+        flight_times = df_subflights_twApt_arr1['ctfmArr'].values - df_subflights_twApt_arr1['ctfmDep'].values
+        weighted_delay_d0 = (df_subflights_twApt_arr1['delayArr'].values + df_subflights_twApt_arr1['delayDep'].values) \
+                            *  (flight_times/3600)
+        weighted_incoming_delay_d0 = weighted_delay_d0.sum()
 
 
 
@@ -244,7 +246,7 @@ def calculateAirportDelays(df_flights, airportList, tw):
 
         df_aptDelayVal = [df_aptDelayVal_d0, df_aptDelayVal_dl, df_aptDelayVal_dm, df_aptDelayVal_d0avg,
                           df_aptDelayVal_dlavg, df_aptDelayVal_dmavg, df_aptDelayVal_d0avg15, df_aptDelayVal_dlavg15,
-                          df_aptDelayVal_dmavg15, weighted_delay_d0]
+                          df_aptDelayVal_dmavg15, weighted_incoming_delay_d0]
 
         return df_aptDelayVal
 
@@ -252,7 +254,7 @@ def calculateAirportDelays(df_flights, airportList, tw):
 
     df_aptDelayVal = pd.DataFrame(data=df_aptDelayVal, index=airportList,
                                   columns=["d_0", "d_L", "d_M", "d_0_avg", "d_L_avg", "d_M_avg", "d_0_avg15",
-                                           "d_L_avg15", "d_M_avg15", "weighted_delay_d0"])
+                                           "d_L_avg15", "d_M_avg15", "weighted_arrival_delay_d0"])
 
     #     df_aptDelayVal.loc["XXXX"] = 0
 
