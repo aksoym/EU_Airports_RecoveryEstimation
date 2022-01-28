@@ -161,11 +161,13 @@ def calculateAirportDelays(df_flights, airportList, tw):
         df_subflights_twApt_1 = (len(df_subflights_twApt_dep1) + len(df_subflights_twApt_arr1))
 
         #NEW LINES FOR WEIGHTED DELAY VALUES.(26-01-2022)
+        df_subflights_twApt_arr1['flight_time'] = df_subflights_twApt_arr1['ctfmArr'] - df_subflights_twApt_arr1['ctfmDep']
+        df_subflights_twApt_arr1['delayDep'] = df_subflights_twApt_arr1['delayDep'].clip(lower=0)
+        df_subflights_twApt_arr1['delayArr'] = df_subflights_twApt_arr1['delayDep'].clip(lower=0)
+        df_subflights_twApt_arr1['weighted_delays'] = (df_subflights_twApt_arr1['delayArr'] + df_subflights_twApt_arr1['delayDep']) \
+                                                      * (df_subflights_twApt_arr1['flight_time'] / 3600)
 
-        flight_times = df_subflights_twApt_arr1['ctfmArr'].values - df_subflights_twApt_arr1['ctfmDep'].values
-        weighted_delay_d0 = (df_subflights_twApt_arr1['delayArr'].values + df_subflights_twApt_arr1['delayDep'].values) \
-                            *  (flight_times/3600)
-        weighted_incoming_delay_d0 = weighted_delay_d0.sum()
+        weighted_incoming_delay_d0 = df_subflights_twApt_arr1['weighted_delays'].clip(lower=0).sum()
 
 
 
