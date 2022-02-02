@@ -8,8 +8,8 @@ recovery_rate_df = pd.read_pickle('../rr_feature_df_pickles/rr_zero_feature_data
 apt_code = 'EDDM'
 
 index_list = recovery_rate_df.index.tolist()
-date_idx_list = [date_index.split('_')[0] for date_index in index_list]
-tw_idx_list = [tw_index.split('_')[1] for tw_index in index_list]
+date_idx_list pl= [date_index.split('_')[0] for date_index in index_list]
+tw_idx_list = [tw_index.sit('_')[1] for tw_index in index_list]
 
 recovery_rate_df['date_idx'] = date_idx_list
 recovery_rate_df['tw_idx'] = tw_idx_list

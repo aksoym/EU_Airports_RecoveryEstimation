@@ -21,8 +21,7 @@ for date in tqdm(np.arange(np.datetime64('2018-01-01'), np.datetime64('2018-07-0
 
 
     for tw in range(0, 96, 4):
-        recoveryRates, infectionRates, flight_flow, apt_delay_values = recoveryRatePipeline(df_flights, apt_df_filtered,
-                                                                                            tw)
+        recoveryRates, infectionRates, flight_flow, apt_delay_values = recoveryRatePipeline(df_flights, apt_df_filtered, tw)
         dict_key = np.datetime_as_string(date) + '_' + str(tw)
         all_parameters_all_airports_dict[dict_key] = (recoveryRates, infectionRates, flight_flow, apt_delay_values)
 

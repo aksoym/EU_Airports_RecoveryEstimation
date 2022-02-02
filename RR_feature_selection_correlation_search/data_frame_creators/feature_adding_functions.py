@@ -2,25 +2,28 @@ import pandas as pd
 import numpy as np
 import pickle
 from datetime import datetime, timedelta
+import os
 from tqdm import tqdm
-from feature_generating_functions import *
+from RR_feature_selection_correlation_search.data_frame_creators.feature_generating_functions import *
 
-apt_df_filtered = pd.read_csv('/home/aksoy/Desktop/START/Muhammet/Start_PyCharm/misc_data/airportFiltered.csv', index_col=0)
+root_path = os.getcwd().split('Start_PyCharm')[0]
+apt_df_filtered = pd.read_csv(root_path + 'Start_PyCharm/misc_data/airportFiltered.csv', index_col=0)
 
 #Regulation data for reg. data adding function.
-regulation_data = pd.read_csv('/home/aksoy/Desktop/START/Muhammet/Start_PyCharm/misc_data/regulationData_wBools.csv')
+regulation_data = pd.read_csv(root_path + 'Start_PyCharm/misc_data/regulationData_wBools.csv')
 regulation_data = regulation_data[(regulation_data['date'] >= '2018-01-01') & (regulation_data['date'] <= '2018-07-01')]
 
 
-def add_regulation_features(recovery_rate_df, apt_code):
+def add_regulation_features(airport_state_df):
     regulation_list = []
 
-    for date, tw in zip(recovery_rate_df['date_idx'], recovery_rate_df['tw_idx']):
-        date_filtered = regulation_data[(regulation_data['date'] == date) & (regulation_data['airport/airspaceName'] == apt_code)]
-        tw = float(tw)
-        datetime_date = datetime.strptime(date, "%Y-%m-%d")
-        next_day = datetime_date + timedelta(days=1)
-        next_day_str = datetime.strftime(next_day, "%Y-%m-%d")
+    for date, tw , apt in tqdm(airport_state_df.index.tolist(), position = 0, leave = True):
+        date_filtered = regulation_data[(regulation_data['date'] == date) & (regulation_data['airport/airspaceName'] == apt)]
+
+        ##DEPRECATED.
+        # datetime_date = datetime.strptime(date, "%Y-%m-%d")
+        # next_day = datetime_date + timedelta(days=1)
+        # next_day_str = datetime.strftime(next_day, "%Y-%m-%d")
 
 
         if len(date_filtered):
@@ -65,14 +68,14 @@ def add_regulation_features(recovery_rate_df, apt_code):
     reg_cause_list = [tup[1] for tup in regulation_list]
     reg_bool_list = [tup[2] for tup in regulation_list]
 
-    recovery_rate_df['reg_type'] = reg_type_list
-    recovery_rate_df['reg_cause'] = reg_cause_list
-    recovery_rate_df['reg_bool_type'] = reg_bool_list
+    airport_state_df['reg_type'] = reg_type_list
+    airport_state_df['reg_cause'] = reg_cause_list
+    airport_state_df['reg_bool_type'] = reg_bool_list
 
-    return recovery_rate_df
+    return airport_state_df
 
-
-def add_capacity_change(recovery_rate_df, apt_code):
+##NOT NECESSARY TO USE.
+def add_capacity_change(aiport_state_df):
     date_tw_indexes = recovery_rate_df.index
     capacity_change_list = []
     for index in date_tw_indexes:
@@ -88,7 +91,7 @@ def add_capacity_change(recovery_rate_df, apt_code):
 
     return recovery_rate_df
 
-
+#NOT NECESSARY TO USE.
 def add_prev_total_capacity(recovery_rate_df, apt_code):
     date_tw_indexes = recovery_rate_df.index
 
@@ -123,7 +126,7 @@ def add_prev_total_capacity(recovery_rate_df, apt_code):
 
     return recovery_rate_df
 
-
+#NOT NECESSARY TO USE.
 def add_prev_capacity_change(recovery_rate_df, apt_code):
     date_tw_indexes = recovery_rate_df.index
 
@@ -150,48 +153,64 @@ def add_prev_capacity_change(recovery_rate_df, apt_code):
 
     return recovery_rate_df
 
-def add_avg_capacity(recovery_rate_df, apt_code):
-    date_tw_indexes = recovery_rate_df.index
 
-    avg_capacity_list = []
-    total_capacity_list = []
-    for index in date_tw_indexes:
-        date = index.split('_')[0]
-        trimmed_date = date.replace('-', '')
-        tw = int(index.split('_')[1])
+def add_capacity(airport_state_df):
 
-        df_flights = pd.read_csv('../../csv/' + trimmed_date[0:6] + "/" + trimmed_date + ".csv")
+    date_cache = 0
+    capacity_list = []
+    for date, tw, apt in tqdm(airport_state_df.index.tolist(), position = 0, leave = True):
 
-        avg_capacity, total_capacity = capacity(apt_code, tw, df_flights)
+        if date != date_cache:
+            trimmed_date = date.replace('-', '')
+            df_flights = pd.read_csv('../../csv/' + trimmed_date[0:6] + "/" + trimmed_date + ".csv")
 
-        avg_capacity_list.append(avg_capacity)
-        total_capacity_list.append(total_capacity)
+        capacity_ = capacity(apt, tw, df_flights)
 
+        capacity_list.append(capacity_)
 
+        date_cache = date
 
+    airport_state_df['capacity'] = capacity_list
 
-    recovery_rate_df['total_capacity'] = total_capacity_list
-    recovery_rate_df['avg_capacity'] = avg_capacity_list
-
-    return recovery_rate_df
+    return airport_state_df
 
 
-def add_demand(recovery_rate_df, apt_code):
-    date_tw_indexes = recovery_rate_df.index
+def add_demand(airport_state_df):
 
+    date_cache = 0
     avg_demand_list = []
-    for index in tqdm(date_tw_indexes):
-        date = index.split('_')[0]
-        trimmed_date = date.replace('-', '')
-        tw = int(index.split('_')[1])
+    for date, tw, apt in tqdm(airport_state_df.index.tolist(), position = 0, leave = True):
 
-        df_flights = pd.read_csv('../../csv/' + trimmed_date[0:6] + "/" + trimmed_date + ".csv")
+        if date != date_cache:
+            trimmed_date = date.replace('-', '')
+            df_flights = pd.read_csv('../../csv/' + trimmed_date[0:6] + "/" + trimmed_date + ".csv")
 
-        avg_demand, total_demand = demand(apt_code, tw, df_flights, apt_df_filtered)
+        avg_demand = demand(apt, tw, df_flights)
 
         avg_demand_list.append(avg_demand)
 
-    recovery_rate_df['avg_demand'] = avg_demand_list
+        date_cache = date
 
-    return recovery_rate_df
+    airport_state_df['avg_demand'] = avg_demand_list
 
+    return airport_state_df
+
+def add_outflow(airport_state_df):
+
+    date_cache = 0
+    outflow_list = []
+    for date, tw, apt in tqdm(airport_state_df.index.tolist(), position = 0, leave = True):
+
+        if date != date_cache:
+            trimmed_date = date.replace('-', '')
+            df_flights = pd.read_csv('../../csv/' + trimmed_date[0:6] + "/" + trimmed_date + ".csv")
+
+        outflow_ = outflow(apt, tw, df_flights)
+
+        outflow_list.append(outflow_)
+
+        date_cache = date
+
+    airport_state_df['outflow'] = outflow_list
+
+    return airport_state_df

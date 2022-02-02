@@ -14,7 +14,7 @@ airport_name_list = pd.read_csv('../../misc_data/airportFiltered.csv', index_col
 #Get the dates and tws.
 date_list = [np.datetime_as_string(date) for date in np.arange(np.datetime64('2018-01-01'),
                                                                np.datetime64('2018-07-01'))]
-tw_list = range(24)
+tw_list = range(0, 96, 4)
 
 #Create the multi index object for dataframe.
 dataframe_mult_index = pd.MultiIndex.from_product([date_list, tw_list, airport_name_list],
