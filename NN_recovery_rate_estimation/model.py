@@ -32,7 +32,7 @@ class LSTMEstimator(nn.Module):
                              ('relu' + str(layer_count), nn.LeakyReLU())]
             layer_list.extend(layers_to_add)
 
-            input_size = self.output_size
+            input_size = self.dense_output_size
             self.dense_output_size = int(input_size * self.dense_multiplier)
 
         self.feature_extracting_layers = nn.Sequential(
@@ -40,7 +40,7 @@ class LSTMEstimator(nn.Module):
         )
 
         self.lstm_layer = nn.LSTM(
-            self.dense_output_size, self.lstm_hidden_count, dropout=0.5,
+            int(self.dense_output_size/self.dense_multiplier), self.lstm_hidden_count, dropout=0.5,
             batch_first=True, num_layers=self.lstm_depth
         )
 
@@ -55,10 +55,21 @@ class LSTMEstimator(nn.Module):
         )
 
 
-    def forward(self, x, hidden_state):
+    def forward(self, x):
         #Apply feature extraction to every vector in the sequence.
+        #Input is in the form x = (batch, sequence, features)
 
+        flattened_features = x.reshape(-1, x.shape[-1])
+        flattened_extracted_features = self.feature_extracting_layers(flattened_features)
+        sequenced_features = flattened_extracted_features.reshape(x.shape[0], self.window, -1)
 
+        lstm_output, _ = self.lstm_layer(sequenced_features)
+
+        #Squeeze sequence and feature dimensions together for estimating layers.
+        flattened_lstm_output = lstm_output.reshape(x.shape[0], -1)
+        estimator_output = self.estimator_layers(flattened_lstm_output)
+
+        return estimator_output
 
 
 
