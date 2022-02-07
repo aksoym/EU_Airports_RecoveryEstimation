@@ -5,6 +5,7 @@ import wandb
 
 train_loss_history = []
 val_loss_history = []
+
 def model_train(model, optimizer, criterion, number_of_epochs, train_loader, val_loader, train_loss_history, val_loss_history,
                 model_save_path):
 

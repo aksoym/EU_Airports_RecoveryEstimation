@@ -12,11 +12,10 @@ import pytorch_lightning as pl
 
 
 
-
-class LSTMEstimator(nn.Module):
+class LSTMEstimator(pl.LightningModule):
 
     def __init__(self, feature_size, initial_dense_layer_size, dense_parameter_multiplier, dense_layer_count,
-                 lstm_layer_count, lstm_hidden_units, sequence_length):
+                 lstm_layer_count, lstm_hidden_units, sequence_length, loss='huber'):
         super(LSTMEstimator, self).__init__()
 
         self.lstm_depth = lstm_layer_count
@@ -26,6 +25,9 @@ class LSTMEstimator(nn.Module):
         self.dense_count = dense_layer_count
         self.lstm_hidden_count = lstm_hidden_units
         self.window = sequence_length
+        self.loss_functions = {'huber': F.huber_loss, 'mse': F.mse_loss}
+        self.loss = self.loss_functions[loss]
+
 
 
         layer_list = []
@@ -34,7 +36,7 @@ class LSTMEstimator(nn.Module):
                 input_size = self.feature_size
                 self.dense_output_size = self.dense_size
 
-            layers_to_add = [('linear'+str(layer_count), nn.Linear(input_size, self.dense_output_size)),
+            layers_to_add = [('linear' + str(layer_count), nn.Linear(input_size, self.dense_output_size)),
                              ('relu' + str(layer_count), nn.LeakyReLU())]
             layer_list.extend(layers_to_add)
 
@@ -46,12 +48,12 @@ class LSTMEstimator(nn.Module):
         )
 
         self.lstm_layer = nn.LSTM(
-            int(self.dense_output_size/self.dense_multiplier), self.lstm_hidden_count, dropout=0.5,
+            int(self.dense_output_size / self.dense_multiplier), self.lstm_hidden_count, dropout=0.5,
             batch_first=True, num_layers=self.lstm_depth
         )
 
         self.estimator_layers = nn.Sequential(
-            nn.Linear(self.lstm_hidden_count*self.window, 100),
+            nn.Linear(self.lstm_hidden_count * self.window, 100),
             nn.LeakyReLU(),
             nn.Linear(100, 50),
             nn.LeakyReLU(),
@@ -59,7 +61,6 @@ class LSTMEstimator(nn.Module):
             nn.LeakyReLU(),
             nn.Linear(10, 1)
         )
-
 
     def forward(self, x):
         #Apply feature extraction to every vector in the sequence.
@@ -78,4 +79,19 @@ class LSTMEstimator(nn.Module):
         return estimator_output
 
 
+    def training_step(self, batch, batch_idx):
+        feature_sequence, target = batch
+        estimation = self(feature_sequence)
+        loss = self.loss(estimation, target.reshape(-1, 1))
+        self.log('training_loss', loss, on_step=False, on_epoch=True)
+        return loss
 
+    def validation_step(self, batch, batch_idx):
+        feature_sequence, target = batch
+        estimation = self(feature_sequence)
+        loss = self.loss(estimation, target.reshape(-1, 1))
+        self.log('val_loss', loss, on_step=False, on_epoch=True)
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=1e-3)

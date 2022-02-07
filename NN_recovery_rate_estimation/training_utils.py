@@ -1,5 +1,13 @@
 import torch
 import torch.utils.data
+import random
+import numpy as np
+
+def set_seed(seed):
+    torch.manual_seed(seed)
+    random.random(seed)
+    np.random.seed(0)
+
 
 def compute_mean_and_std(dataset_subset):
     feature_tensors = []
