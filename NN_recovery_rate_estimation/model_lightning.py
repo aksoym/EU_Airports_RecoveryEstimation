@@ -6,9 +6,13 @@ from torch import nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
-
+from torch.optim.lr_scheduler import SequentialLR, StepLR, ReduceLROnPlateau
 
 import pytorch_lightning as pl
+
+import wandb
+
+
 
 
 
@@ -91,7 +95,20 @@ class LSTMEstimator(pl.LightningModule):
         estimation = self(feature_sequence)
         loss = self.loss(estimation, target.reshape(-1, 1))
         self.log('val_loss', loss, on_step=False, on_epoch=True)
+
+        if batch_idx == 0:
+            plot_data = []
+            for idx in range(target.shape[0]):
+                plot_data.append([idx, estimation.reshape(-1)[idx], 'prediction'])
+                plot_data.append([idx, target.reshape(-1)[idx], 'actual'])
+
+            log_table = wandb.Table(data=plot_data, columns=['sample', 'recovery_rate', 'label'])
+            wandb.log({"snapshot": wandb.plot.scatter(log_table,'sample', 'recovery_rate', 'label')})
+
         return loss
 
     def configure_optimizers(self):
-        return torch.optim.Adam(self.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        scheduler1 = StepLR(optimizer, step_size=1, gamma=0.99)
+        scheduler2 = ReduceLROnPlateau(optimizer, mode='min', factor=0.95, patience=5, cooldown=10)
+        return [optimizer], [SequentialLR(optimizer, schedulers=[scheduler1, scheduler2], milestones=[100])]
