@@ -7,11 +7,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
 
-
 import pytorch_lightning as pl
 
 
-
+# noinspection PyCallingNonCallable
 class LSTMEstimator(pl.LightningModule):
 
     def __init__(self, feature_size, initial_dense_layer_size, dense_parameter_multiplier, dense_layer_count,
@@ -27,8 +26,6 @@ class LSTMEstimator(pl.LightningModule):
         self.window = sequence_length
         self.loss_functions = {'huber': F.huber_loss, 'mse': F.mse_loss}
         self.loss = self.loss_functions[loss]
-
-
 
         layer_list = []
         for layer_count in range(self.dense_count):
@@ -81,14 +78,14 @@ class LSTMEstimator(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         feature_sequence, target = batch
-        estimation = self(feature_sequence)
+        estimation = self.forward(feature_sequence)
         loss = self.loss(estimation, target.reshape(-1, 1))
         self.log('training_loss', loss, on_step=False, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         feature_sequence, target = batch
-        estimation = self(feature_sequence)
+        estimation = self.forward(feature_sequence)
         loss = self.loss(estimation, target.reshape(-1, 1))
         self.log('val_loss', loss, on_step=False, on_epoch=True)
         return loss
