@@ -5,3 +5,4 @@ state_vector_dataframes_as_training_data/data/
 csv/
 misc_data/
 *.csv
+neuralNetwork_models/
