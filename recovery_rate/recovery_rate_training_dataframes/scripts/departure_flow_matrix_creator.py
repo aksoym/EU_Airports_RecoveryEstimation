@@ -1,11 +1,14 @@
-from functions import flow_matrix_from_departures_only
+import pickle
+
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
-import pickle
+
+from functions import flow_matrix_from_departures_only
+
 
 #This is to omit settingwithcopy warnings.
-pd.set_option('mode.chained_assignment',None)
+pd.set_option('mode.chained_assignment', None)
 
 
 file_root = "../../csv/"
@@ -42,4 +45,4 @@ combined_matrix_df = pd.concat(matrix_list, axis=0, ignore_index=True)
 
 flight_flow_dataframe.iloc[0:len(combined_matrix_df), 0:len(combined_matrix_df.columns)] = combined_matrix_df.values
 
-flight_flow_dataframe.to_pickle('hourly_departure_matrix.pickle')gi
+flight_flow_dataframe.to_pickle('hourly_departure_matrix.pickle')
