@@ -2,3 +2,6 @@
 state_vector_dataframes_as_training_data/data/
 *.html
 *.pickle
+csv/
+misc_data/
+*.csv
