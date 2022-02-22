@@ -19,9 +19,9 @@ import wandb
 class LSTMEstimator(pl.LightningModule):
 
     def __init__(self, feature_size, initial_dense_layer_size, dense_parameter_multiplier, dense_layer_count,
-                 lstm_layer_count, lstm_hidden_units, sequence_length, loss='huber'):
+                 lstm_layer_count, lstm_hidden_units, sequence_length, dropout=0.2, lr=0.001, loss='huber'):
         super(LSTMEstimator, self).__init__()
-
+        self.save_hyperparameters()
         self.lstm_depth = lstm_layer_count
         self.dense_multiplier = dense_parameter_multiplier
         self.feature_size = feature_size
@@ -31,6 +31,8 @@ class LSTMEstimator(pl.LightningModule):
         self.window = sequence_length
         self.loss_functions = {'huber': F.huber_loss, 'mse': F.mse_loss}
         self.loss = self.loss_functions[loss]
+        self.lr = lr
+        self.dropout = dropout
 
 
 
@@ -41,29 +43,42 @@ class LSTMEstimator(pl.LightningModule):
                 self.dense_output_size = self.dense_size
 
             layers_to_add = [('linear' + str(layer_count), nn.Linear(input_size, self.dense_output_size)),
-                             ('relu' + str(layer_count), nn.LeakyReLU())]
+                             ('relu' + str(layer_count), nn.LeakyReLU()),
+                             ('dropout' + str(layer_count), nn.Dropout(self.dropout))]
             layer_list.extend(layers_to_add)
 
             input_size = self.dense_output_size
             self.dense_output_size = int(input_size * self.dense_multiplier)
+
+        layer_list.extend([('linear' + str(layer_count+1), nn.Linear(self.dense_output_size,
+                                                                    self.dense_output_size*self.dense_multiplier))])
 
         self.feature_extracting_layers = nn.Sequential(
             OrderedDict(layer_list)
         )
 
         self.lstm_layer = nn.LSTM(
-            int(self.dense_output_size / self.dense_multiplier), self.lstm_hidden_count, dropout=0.5,
+            int(self.dense_output_size / self.dense_multiplier), self.lstm_hidden_count, dropout=self.dropout,
             batch_first=True, num_layers=self.lstm_depth
         )
 
+        estimator_layers = []
+        for layer_count in range(self.dense_count):
+            if layer_count == self.dense_count - 1:
+                layer = [("output_layer", nn.Linear(self.dense_size, 1, bias=False))]
+            elif layer_count == 0:
+                layer = [("linear_" + str(layer_count), nn.Linear(self.lstm_hidden_count * self.window, self.dense_size)),
+                         ("relu_" + str(layer_count), nn.LeakyReLU()),
+                         ("dropout_" + str(layer_count), nn.Dropout(self.dropout))]
+            else:
+                layer = [("linear_" + str(layer_count), nn.Linear(self.dense_size, self.dense_size)),
+                         ("relu_" + str(layer_count), nn.LeakyReLU()),
+                         ("dropout_" + str(layer_count), nn.Dropout(self.dropout))]
+
+            estimator_layers.extend(layer)
+
         self.estimator_layers = nn.Sequential(
-            nn.Linear(self.lstm_hidden_count * self.window, 100),
-            nn.LeakyReLU(),
-            nn.Linear(100, 50),
-            nn.LeakyReLU(),
-            nn.Linear(50, 10),
-            nn.LeakyReLU(),
-            nn.Linear(10, 1)
+            OrderedDict(estimator_layers)
         )
 
     def forward(self, x):
@@ -108,7 +123,9 @@ class LSTMEstimator(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
-        scheduler1 = StepLR(optimizer, step_size=1, gamma=0.99)
-        scheduler2 = ReduceLROnPlateau(optimizer, mode='min', factor=0.95, patience=5, cooldown=10)
-        return [optimizer], [SequentialLR(optimizer, schedulers=[scheduler1, scheduler2], milestones=[100])]
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        #scheduler1 = StepLR(optimizer, step_size=1, gamma=0.99)
+        scheduler2 = ReduceLROnPlateau(optimizer, mode='min', factor=0.95, patience=5, cooldown=0)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler2, "monitor": "val_loss"}
+
+
