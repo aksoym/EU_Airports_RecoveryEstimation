@@ -6,7 +6,7 @@ from torch import nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split
-from torch.optim.lr_scheduler import SequentialLR, StepLR, ReduceLROnPlateau
+from torch.optim.lr_scheduler import SequentialLR, CyclicLR, ReduceLROnPlateau
 
 import pytorch_lightning as pl
 
@@ -29,7 +29,7 @@ class LSTMEstimator(pl.LightningModule):
         self.dense_count = dense_layer_count
         self.lstm_hidden_count = lstm_hidden_units
         self.window = sequence_length
-        self.loss_functions = {'huber': F.huber_loss, 'mse': F.mse_loss}
+        self.loss_functions = {'huber': F.huber_loss, 'mse': F.mse_loss, "mae": F.l1_loss}
         self.loss = self.loss_functions[loss]
         self.lr = lr
         self.dropout = dropout
@@ -124,8 +124,9 @@ class LSTMEstimator(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
-        #scheduler1 = StepLR(optimizer, step_size=1, gamma=0.99)
-        scheduler2 = ReduceLROnPlateau(optimizer, mode='min', factor=0.95, patience=5, cooldown=0)
+        #scheduler1 = CyclicLR(optimizer, base_lr=1e-7, max_lr=1e-4, mode="triangular2", cycle_momentum=False,
+                              #step_size_up=100, step_size_down=100)
+        scheduler2 = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=50, cooldown=10, min_lr=1e-10)
         return {"optimizer": optimizer, "lr_scheduler": scheduler2, "monitor": "val_loss"}
 
 
