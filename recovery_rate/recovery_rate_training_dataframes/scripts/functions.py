@@ -75,6 +75,38 @@ def dfFlights_twFilter(tw, df_flights):
 
     return df_subflights, df_subsubflights
 
+def hourly_flow_matrix(df_flights, tw, apt_df_filtered):
+
+    #Hourly departure flights.
+    first_hour_flights_dep = df_flights.loc[(df_flights['ftfmDep_tw'] ==  tw) | (df_flights['ftfmDep_tw'] ==  tw + 1) |
+                                        (df_flights['ftfmDep_tw'] ==  tw + 2) | (df_flights['ftfmDep_tw'] ==  tw + 3)]
+
+    second_hour_flights_dep = df_flights.loc[(df_flights['ftfmDep_tw'] ==  tw + 4) | (df_flights['ftfmDep_tw'] ==  tw + 5) |
+                                        (df_flights['ftfmDep_tw'] ==  tw + 6) | (df_flights['ftfmDep_tw'] ==  tw + 7)]
+
+    third_hour_flights_dep = df_flights.loc[(df_flights['ftfmDep_tw'] ==  tw + 8) | (df_flights['ftfmDep_tw'] ==  tw + 9) |
+                                        (df_flights['ftfmDep_tw'] ==  tw + 12) | (df_flights['ftfmDep_tw'] ==  tw + 11)]
+
+    #Hourly arrival flights.
+    first_hour_flights_arr = df_flights.loc[(df_flights['ftfmArr_tw'] ==  tw) | (df_flights['ftfmArr_tw'] ==  tw + 1) |
+                                        (df_flights['ftfmArr_tw'] ==  tw + 2) | (df_flights['ftfmArr_tw'] ==  tw + 3)]
+
+    second_hour_flights_arr = df_flights.loc[(df_flights['ftfmArr_tw'] ==  tw + 4) | (df_flights['ftfmArr_tw'] ==  tw + 5) |
+                                        (df_flights['ftfmArr_tw'] ==  tw + 6) | (df_flights['ftfmArr_tw'] ==  tw + 7)]
+
+    third_hour_flights_arr = df_flights.loc[(df_flights['ftfmArr_tw'] ==  tw + 8) | (df_flights['ftfmArr_tw'] ==  tw + 9) |
+                                        (df_flights['ftfmArr_tw'] ==  tw + 12) | (df_flights['ftfmArr_tw'] ==  tw + 11)]
+
+    first_dep_matrix, _ = flightFlow(apt_df_filtered, first_hour_flights_dep)
+    second_dep_matrix, _ = flightFlow(apt_df_filtered, second_hour_flights_dep)
+    third_dep_matrix, _ = flightFlow(apt_df_filtered, third_hour_flights_dep)
+
+    first_arr_matrix, _ = flightFlow(apt_df_filtered, first_hour_flights_arr)
+    second_arr_matrix, _ = flightFlow(apt_df_filtered, second_hour_flights_arr)
+    third_arr_matrix, _ = flightFlow(apt_df_filtered, third_hour_flights_arr)
+
+    return first_dep_matrix, second_dep_matrix, third_dep_matrix, first_arr_matrix, second_arr_matrix, third_arr_matrix
+
 
 def get_diff_probs(infection_rates, recovery_rates, airportList,
                    differential_timestep, tw, df_flights):
