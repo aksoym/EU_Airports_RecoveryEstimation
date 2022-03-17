@@ -6,3 +6,5 @@ misc_data/
 *.csv
 neuralNetwork_models/
 *.pyc
+**/wandb/
+**/artifacts/

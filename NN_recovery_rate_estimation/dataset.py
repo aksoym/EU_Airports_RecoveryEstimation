@@ -35,7 +35,7 @@ class RecoveryRateDataset(Dataset):
         return dataframe
 
     def __len__(self):
-        return int(np.floor(len(self.dataframe) / self.window))
+        return int(np.floor(len(self.dataframe) - self.apt_count*self.window))
 
     def __getitem__(self, item):
 
@@ -54,8 +54,8 @@ class RecoveryRateDataset(Dataset):
         sample = slice_with_target_row.iloc[0:-1, :]
 
 
-        sample = torch.tensor(sample.to_numpy(dtype=np.float32))
-        target = torch.tensor(target, dtype=torch.float32)
+        sample = torch.tensor(sample.to_numpy(dtype=np.float64))
+        target = torch.tensor(target, dtype=torch.float64)
 
         return sample, target
 
