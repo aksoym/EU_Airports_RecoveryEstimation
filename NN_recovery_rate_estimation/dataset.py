@@ -54,8 +54,8 @@ class RecoveryRateDataset(Dataset):
         sample = slice_with_target_row.iloc[0:-1, :]
 
 
-        sample = torch.tensor(sample.to_numpy(dtype=np.float64))
-        target = torch.tensor(target, dtype=torch.float64)
+        sample = torch.tensor(sample.to_numpy(dtype=np.float32))
+        target = torch.tensor(target, dtype=torch.float32)
 
         return sample, target
 
