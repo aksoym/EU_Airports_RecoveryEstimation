@@ -6,14 +6,14 @@ import numpy as np
 
 class RecoveryRateDataset(Dataset):
 
-    def __init__(self, file_path, features_to_drop, sequence_length=5, transform=None, fill_with=None):
+    def __init__(self, file_path, features_to_drop, sequence_length=3, transform=None, fill_with=None):
 
         self.dataframe = pd.read_pickle(file_path)
         self.transform = transform
         self.window = sequence_length
         self.feature_names = [feature for feature in self.dataframe.columns.tolist()
                               if feature not in features_to_drop]
-        self.apt_count = len(self.dataframe.reset_index()['apt'].unique())
+        self.apt_count = len(self.dataframe.index.unique("apt"))
         self.fill_with = fill_with
 
         try:
@@ -22,6 +22,8 @@ class RecoveryRateDataset(Dataset):
         except:
             pass
 
+        #Preprocesses.
+        self.dataframe["norm_delay_per_f"] = self.dataframe["norm_delay_per_f"].clip(lower=0, upper=1.0).values
 
     def _fill_recovery_rate_nans(self, dataframe, fill_with):
         available_methods = ["backfill", "bfill", "pad", "ffill"]

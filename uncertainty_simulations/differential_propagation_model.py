@@ -39,6 +39,7 @@ def calculate_pdots_on_df(airport_df: pd.DataFrame, infection_matrix: pd.DataFra
     df[output_label] = np.concatenate(p_dot_ndarray_list, axis=0)
     
     return df
+
     
 if __name__ == "main":
     
