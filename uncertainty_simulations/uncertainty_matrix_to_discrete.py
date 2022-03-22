@@ -34,20 +34,103 @@ class UncertaintyMatrix():
                     mean = self.mean_values[i, j]
                     std = self.std_values[i, j]
                     size = self.flow_matrix[i, j]
-                    self.distribution_matrix[i, j] = self.rng.normal(mean, std, size=(size,)).clip(min=0)
+                    self.distribution_matrix[i, j] = self.rng.normal(mean, std, size=(size,)).clip(min=1)
                     
             #Filling diagonal for 0 because it means self loop.
             np.fill_diagonal(self.distribution_matrix, 0)
             #Clipping sub zero entries as this matrix is for future traffic only.
             #self.distribution_matrix = self.distribution_matrix.clip(min=0)
-            sample_list.append(self.distribution_matrix)
+            sample_list.append(self._empty_arrays_2_zero(self.distribution_matrix))
             
         return sample_list
                 
                 
     def _initialize_distribution_matrix(self):
         self.distribution_matrix = np.empty((self.diag_length, self.diag_length), dtype=object)
+        
+    def _empty_arrays_2_zero(self, array):
+        for i in range(array.shape[0]):
+            for j in range(array.shape[1]):
+                if isinstance(array[i, j], np.ndarray):
+                    if array[i, j].size == 0:
+                        array[i, j] = 0
+                    else:
+                        pass
+                else:
+                    pass
+        return array
             
         
+def find_max_in_nested_array(array: np.ndarray) -> float:
+    max_value = -np.inf
+    for element in array.flatten():
+        if max_value < np.amax(element):
+            max_value = np.amax(element)
+    return max_value
+
+def delay_matrix_2_flow_matrices(array: np.ndarray) -> List[np.ndarray]:
+    global_max = find_max_in_nested_array(array)
+    global_min = 0
+    interval = 15 #in minutes.
+    num_infection_matrix_windows = np.ceil(global_max / interval).astype(int)
+    
+    infection_matrix_list = [np.zeros(array.shape, dtype=np.int32) for _ in range(num_infection_matrix_windows)]
+    
+    for i in range(array.shape[0]):
+        for j in range(array.shape[1]):
+            
+                if isinstance(array[i, j], np.ndarray):
+                    for element in array[i, j]:
+                        inf_matrix_index = np.floor_divide(element, interval).astype(int)
+                        infection_matrix_list[inf_matrix_index][i, j] += 1
+                        
+                else:
+                    if array[i, j] > 0:
+                        inf_matrix_index = np.floor_divide(array[i, j], interval).astype(int)
+                        infection_matrix_list[inf_matrix_index][i, j] += 1
+                
+    return infection_matrix_list
+
+
+
 uncertainty_matrix = UncertaintyMatrix(flight_flow_data.loc[("2018-02-08", 48, slice(None)), :].values)
-print(uncertainty_matrix.draw_sample(1))
+arrays = uncertainty_matrix.draw_sample(100)
+
+inf_matrix_list = []
+for array in arrays:
+    inf_matrix_list.append(delay_matrix_2_flow_matrices(array))
+    
+    
+max_ = -np.inf
+min_ = np.inf
+for sublist in inf_matrix_list:
+    if max_ < len(sublist):
+        max_ = len(sublist)
+    if min_ > len(sublist):
+        min_ = len(sublist)
+        
+print(max_, min_)
+inf_matrix_dict = dict()
+for i in range(max_):
+    inf_matrices = []
+    for idx, sublist in enumerate(inf_matrix_list):
+        if not inf_matrices:
+            try:
+                inf_matrices.append(sublist[i])
+            except:
+                pass
+        if inf_matrices:
+            try:
+                if not np.array_equal(sublist[i], inf_matrices[idx-1]):
+                    inf_matrices.append(sublist[i])
+            except:
+                pass
+    inf_matrix_dict[i] = inf_matrices
+    
+
+print(inf_matrix_dict[10])
+print(len(inf_matrix_dict[10]))
+    
+    
+                
+            

@@ -19,4 +19,3 @@ airport_data["predicted_recovery_rate"] = airport_data["recovery_rate"].values
 
 ####TODO load model, load dataset, do inference here.
 ####
-
