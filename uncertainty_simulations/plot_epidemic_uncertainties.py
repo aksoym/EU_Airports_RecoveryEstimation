@@ -10,4 +10,13 @@ infection_matrix_data = pd.read_pickle(infection_matrix_path)
 
 #Data preprocess.
 #Clip the normalized delay to 
-airport_df["norm_delay_per_f"] = airport_df["norm_delay_per_f"].clip(lower=0, upper=1.0).values
+airport_data["norm_delay_per_f"] = airport_data["norm_delay_per_f"].clip(lower=0, upper=1.0).values
+median_rr_values = airport_data["recovery_rate"].median()
+airport_data["recovery_rate"] = airport_data["recovery_rate"].fillna(method="backfill").fillna(median_rr_values).values
+
+#Create a column to store predicted recovery rates.
+airport_data["predicted_recovery_rate"] = airport_data["recovery_rate"].values
+
+####TODO load model, load dataset, do inference here.
+####
+
