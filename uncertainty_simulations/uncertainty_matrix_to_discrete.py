@@ -74,7 +74,7 @@ def delay_matrix_2_flow_matrices(array: np.ndarray) -> List[np.ndarray]:
     interval = 15 #in minutes.
     num_infection_matrix_windows = np.ceil(global_max / interval).astype(int)
     
-    infection_matrix_list = [np.zeros(array.shape, dtype=np.int32) for _ in range(num_infection_matrix_windows)]
+    infection_matrix_list = [np.zeros(array.shape, dtype=np.int8) for _ in range(num_infection_matrix_windows)]
     
     for i in range(array.shape[0]):
         for j in range(array.shape[1]):
@@ -109,7 +109,7 @@ for sublist in inf_matrix_list:
     if min_ > len(sublist):
         min_ = len(sublist)
         
-print(max_, min_)
+
 inf_matrix_dict = dict()
 for i in range(max_):
     inf_matrices = []
@@ -128,9 +128,26 @@ for i in range(max_):
     inf_matrix_dict[i] = inf_matrices
     
 
-print(inf_matrix_dict[10])
-print(len(inf_matrix_dict[10]))
+print(inf_matrix_dict[12])
+print(len(inf_matrix_dict[12]))
     
+    
+for idx in range(len(inf_matrix_dict[12])- 1):
+    arrays = inf_matrix_dict[12]
+    is_equal = np.array_equal(arrays[idx], arrays[idx+1])
+    
+    if is_equal:
+        print(is_equal, idx)
+        
+        
+np.set_printoptions(suppress=True, threshold=2e4)
+for array_subarray in inf_matrix_dict.values():
+    for array in array_subarray:
+        result = np.divide(array, array.sum(axis=1, keepdims=True), where=(array != 0), casting="unsafe")
+        print(result)
+        print(array)
+        break
+    break
+        
     
                 
-            

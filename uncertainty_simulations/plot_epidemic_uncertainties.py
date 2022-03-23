@@ -9,7 +9,7 @@ airport_data = pd.read_pickle(apt_df_path)
 infection_matrix_data = pd.read_pickle(infection_matrix_path)
 
 #Data preprocess.
-#Clip the normalized delay to 
+#Clip the normalized delay to [0, 1].
 airport_data["norm_delay_per_f"] = airport_data["norm_delay_per_f"].clip(lower=0, upper=1.0).values
 median_rr_values = airport_data["recovery_rate"].median()
 airport_data["recovery_rate"] = airport_data["recovery_rate"].fillna(method="backfill").fillna(median_rr_values).values
