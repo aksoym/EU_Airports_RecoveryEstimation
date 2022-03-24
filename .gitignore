@@ -8,3 +8,4 @@ neuralNetwork_models/
 *.pyc
 **/wandb/
 **/artifacts/
+*.ipynb
