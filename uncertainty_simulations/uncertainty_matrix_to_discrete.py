@@ -2,6 +2,9 @@ import numpy as np
 from typing import List, Dict
 import pandas as pd
 
+flow_matrix_path = "../recovery_rate/recovery_rate_training_dataframes/data/all_time_flight_flow_df_rev1.pickle"
+flight_flow_data = pd.read_pickle(flow_matrix_path)
+
 class UncertaintyMatrix():
     
     def __init__(self, flight_flow_matrix: np.ndarray,
@@ -26,27 +29,26 @@ class UncertaintyMatrix():
             self.std_values = std_values
             
         
-    def draw_sample(self, times: int=1) -> List[np.ndarray]:
+    def draw_sample(self) -> np.ndarray:
+    
+        self._initialize_distribution_matrix()
+        rng.integers(len(flight_flow_data))
+        self.inf_matrix_layout = flight_flow_data.iloc[]
         
-        sample_list = []
-        for _ in range(times):
-            self._initialize_distribution_matrix()
-            
-            for i in range(self.distribution_matrix.shape[0]):
-                for j in range(self.distribution_matrix.shape[1]):
-                    mean = self.mean_values[i, j]
-                    std = self.std_values[i, j]
-                    size = self.flow_matrix[i, j]
-                    self.distribution_matrix[i, j] = np.clip(self.rng.normal(mean, std, size=(size,)), a_min=0, a_max=None)
-                    
-            #Filling diagonal for 0 because it means self loop.
-            np.fill_diagonal(self.distribution_matrix, 0)
-            #Clipping sub zero entries as this matrix is for future traffic only.
-            #self.distribution_matrix = self.distribution_matrix.clip(min=0)
-            self.distribution_matrix = self._empty_arrays_2_zero(self.distribution_matrix)
-            sample_list.append(self.distribution_matrix)
-            
-        return sample_list
+        for i in range(self.distribution_matrix.shape[0]):
+            for j in range(self.distribution_matrix.shape[1]):
+                mean = self.mean_values[i, j]
+                std = self.std_values[i, j]
+                size = self.flow_matrix[i, j]
+                self.distribution_matrix[i, j] = np.clip(self.rng.normal(mean, std, size=(size,)), a_min=0, a_max=None)
+                
+        #Filling diagonal for 0 because it means self loop.
+        np.fill_diagonal(self.distribution_matrix, 0)
+        #Clipping sub zero entries as this matrix is for future traffic only.
+        #self.distribution_matrix = self.distribution_matrix.clip(min=0)
+        self.distribution_matrix = self._empty_arrays_2_zero(self.distribution_matrix)
+        
+        return self.distribution_matrix
                 
                 
     def _initialize_distribution_matrix(self):
