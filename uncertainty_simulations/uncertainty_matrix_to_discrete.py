@@ -24,7 +24,7 @@ class UncertaintyMatrix():
         else:
             self.mean_values = mean_values
         if std_values is None:
-            self.std_values = self.rng.uniform(0.1, 20, size=(133, 133))
+            self.std_values = self.rng.uniform(10, 120, size=(133, 133))
         else:
             self.std_values = std_values
             
@@ -38,7 +38,7 @@ class UncertaintyMatrix():
                 mean = self.mean_values[i, j]
                 std = self.std_values[i, j]
                 size = self.flow_matrix[i, j]
-                self.distribution_matrix[i, j] = np.clip(self.rng.normal(mean, std, size=(size,)), a_min=0, a_max=None)
+                self.distribution_matrix[i, j] = np.clip(self.rng.normal(mean, std, size=(size*12,)), a_min=0, a_max=None)
                 
         #Filling diagonal for 0 because it means self loop.
         np.fill_diagonal(self.distribution_matrix, 0)
