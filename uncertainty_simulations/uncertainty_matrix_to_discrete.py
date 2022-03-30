@@ -24,7 +24,7 @@ class UncertaintyMatrix():
         else:
             self.mean_values = mean_values
         if std_values is None:
-            self.std_values = self.rng.uniform(0.1, 10, size=(133, 133))
+            self.std_values = self.rng.uniform(0.1, 20, size=(133, 133))
         else:
             self.std_values = std_values
             
